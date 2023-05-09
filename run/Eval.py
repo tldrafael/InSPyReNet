@@ -33,7 +33,8 @@ def evaluate(opt, args):
 
     for dataset in datasets:
         pred_root = os.path.join(opt.Eval.pred_root, dataset)
-        gt_root = os.path.join(opt.Eval.gt_root, dataset, 'masks')
+        # gt_root = os.path.join(opt.Eval.gt_root, dataset, 'masks')
+        gt_root = os.path.join(opt.Eval.gt_root, dataset, 'gt')
 
         preds = os.listdir(pred_root)
         gts = os.listdir(gt_root)

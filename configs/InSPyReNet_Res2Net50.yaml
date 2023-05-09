@@ -8,7 +8,8 @@ Model:
 Train:
     Dataset:
         type: "RGB_Dataset"
-        root: "data/Train_Dataset"
+        # root: "data/Train_Dataset"
+        root: "/home/rafael_pixelcut_app/data_insp/"
         sets: ['DUTS-TR']
         transforms:
             static_resize: 

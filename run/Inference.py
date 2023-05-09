@@ -27,7 +27,7 @@ def _args():
     parser.add_argument('--source', '-s',     type=str)
     parser.add_argument('--dest', '-d',       type=str,            default=None)
     parser.add_argument('--type', '-t',       type=str,            default='map')
-    parser.add_argument('--gpu', '-g',        action='store_true', default=False)
+    parser.add_argument('--gpu', '-g',        action='store_true', default=True)
     parser.add_argument('--jit', '-j',        action='store_true', default=False)
     parser.add_argument('--verbose', '-v',    action='store_true', default=False)
     return parser.parse_args()
@@ -48,7 +48,9 @@ def get_format(source):
 def inference(opt, args):
     model = eval(opt.Model.name)(**opt.Model)
     model.load_state_dict(torch.load(os.path.join(
-        opt.Test.Checkpoint.checkpoint_dir, 'latest.pth'), map_location=torch.device('cpu')), strict=True)
+       opt.Test.Checkpoint.checkpoint_dir, 'latest.pth'), map_location=torch.device('cpu')), strict=True)
+    # model.load_state_dict(torch.load('/home/rafael_pixelcut_app/inspyrenet_DUTSTR_HRSODTR.pth'))
+    # model.load_state_dict(torch.load('/home/rafael_pixelcut_app/inspyrenet_massiveSOD.pth'))
     
     if args.gpu is True:
         model = model.cuda()
@@ -84,6 +86,7 @@ def inference(opt, args):
     if save_dir is not None:
         os.makedirs(save_dir, exist_ok=True)
     
+    _format = 'Image'
     sample_list = eval(_format + 'Loader')(args.source, opt.Test.Dataset.transforms)
 
     if args.verbose is True:

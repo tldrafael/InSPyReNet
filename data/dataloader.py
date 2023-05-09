@@ -33,7 +33,9 @@ class RGB_Dataset(Dataset):
         self.images, self.gts = [], []
         
         for set in sets:
-            image_root, gt_root = os.path.join(root, set, 'images'), os.path.join(root, set, 'masks')
+            # image_root, gt_root = os.path.join(root, set, 'images'), os.path.join(root, set, 'masks')
+            # image_root, gt_root = os.path.join(root, set, 'im'), os.path.join(root, set, 'gt')
+            image_root, gt_root = os.path.join(root, set, 'train/im'), os.path.join(root, set, 'train/gt')
 
             images = [os.path.join(image_root, f) for f in os.listdir(image_root) if f.lower().endswith(('.jpg', '.png'))]
             images = sort(images)

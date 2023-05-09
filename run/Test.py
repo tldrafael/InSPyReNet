@@ -21,7 +21,9 @@ torch.backends.cudnn.allow_tf32 = False
 
 def test(opt, args):
     model = eval(opt.Model.name)(**opt.Model)
-    model.load_state_dict(torch.load(os.path.join(opt.Test.Checkpoint.checkpoint_dir, 'latest.pth')), strict=True)
+    model.load_state_dict(torch.load('/home/rafael_pixelcut_app/inspyrenet_DUTSTR_HRSODTR_LR.pth'))
+    # model.load_state_dict(torch.load('/home/rafael_pixelcut_app/inspyrenet_massiveSOD.pth'))
+    # model.load_state_dict(torch.load(os.path.join(opt.Test.Checkpoint.checkpoint_dir, 'latest.pth')), strict=True)
         
     model.cuda()
     model.eval()

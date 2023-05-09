@@ -51,7 +51,9 @@ def train(opt, args):
     model_ckpt = None
     state_ckpt = None
     
+    print(f'resume: {args.resume}')
     if args.resume is True:
+        print('Resume from checkpoint')
         if os.path.isfile(os.path.join(opt.Train.Checkpoint.checkpoint_dir, 'latest.pth')):
             model_ckpt = torch.load(os.path.join(opt.Train.Checkpoint.checkpoint_dir, 'latest.pth'), map_location='cpu')
             if args.local_rank <= 0:
@@ -62,6 +64,7 @@ def train(opt, args):
                 print('Resume from state')
         
     model = eval(opt.Model.name)(**opt.Model)
+    model.load_state_dict(torch.load('/home/rafael_pixelcut_app/inspyrenet_massiveSOD.pth'))
     if model_ckpt is not None:
         model.load_state_dict(model_ckpt)
 
@@ -115,8 +118,9 @@ def train(opt, args):
 
     for epoch in epoch_iter:
         if args.local_rank <= 0 and args.verbose is True:
-            step_iter = tqdm.tqdm(enumerate(train_loader, start=1), desc='Iter', total=len(
-                train_loader), position=1, leave=False, bar_format='{desc:<5.5}{percentage:3.0f}%|{bar:40}{r_bar}')
+            total = len(train_loader)
+            step_iter = tqdm.tqdm(enumerate(train_loader, start=1), desc='Iter', total=total,
+                position=1, leave=False, bar_format='{desc:<5.5}{percentage:3.0f}%|{bar:40}{r_bar}')
             if args.device_num > 1 and train_sampler is not None:
                 train_sampler.set_epoch(epoch)
         else:
@@ -142,6 +146,9 @@ def train(opt, args):
 
             if args.local_rank <= 0 and args.verbose is True:
                 step_iter.set_postfix({'loss': out['loss'].item()})
+
+            if i > 1000:
+                break
 
         if args.local_rank <= 0:
             os.makedirs(opt.Train.Checkpoint.checkpoint_dir, exist_ok=True)
