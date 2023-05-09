@@ -30,7 +30,14 @@ def bce_loss_with_logits(pred, mask, reduction='none'):
     return bce_loss(torch.sigmoid(pred), mask, reduction=reduction)
 
 def weighted_bce_loss_with_logits(pred, mask, reduction='none'):
-    return weighted_bce_loss(torch.sigmoid(pred), mask, reduction=reduction)
+    # return weighted_bce_loss(torch.sigmoid(pred), mask, reduction=reduction)
+    weight = 1 + 5 * torch.abs(F.avg_pool2d(mask, kernel_size=31, stride=1, padding=15) - mask)
+    bce = F.binary_cross_entropy_with_logits(pred, mask, reduction='none')
+    bce = weight.flatten() * bce.flatten()
+    if reduction == 'mean':
+        bce = bce.mean()
+    return bce
+
 
 def iou_loss_with_logits(pred, mask, reduction='none'):
     return iou_loss(torch.sigmoid(pred), mask, reduction=reduction)
