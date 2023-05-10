@@ -141,3 +141,4 @@ snapshots/
 tags
 **/*.swp
 tags
+pretrained/

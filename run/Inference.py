@@ -48,7 +48,7 @@ def get_format(source):
 def inference(opt, args):
     model = eval(opt.Model.name)(**opt.Model)
     model.load_state_dict(torch.load(os.path.join(
-       opt.Test.Checkpoint.checkpoint_dir, 'latest.pth'), map_location=torch.device('cpu')), strict=True)
+       opt.Test.Checkpoint.checkpoint_dir, 'latest.pth'), map_location=torch.device('cuda')), strict=True)
     # model.load_state_dict(torch.load('/home/rafael_pixelcut_app/inspyrenet_DUTSTR_HRSODTR.pth'))
     # model.load_state_dict(torch.load('/home/rafael_pixelcut_app/inspyrenet_massiveSOD.pth'))
     
@@ -119,10 +119,15 @@ def inference(opt, args):
                 
                     
         pred = to_numpy(out['pred'], sample['shape'])
+        if np.isnan(pred).any():
+            continue
+        # else:
+            # print('it worked')
+
         img = np.array(sample['original'])
-        
         if args.type == 'map':
-            img = (np.stack([pred] * 3, axis=-1) * 255).astype(np.uint8)
+            # img = (np.stack([pred] * 3, axis=-1) * 255).astype(np.uint8)
+            img = (pred * 255).astype(np.uint8)
         elif args.type == 'rgba':
             r, g, b = cv2.split(img)
             pred = (pred * 255).astype(np.uint8)

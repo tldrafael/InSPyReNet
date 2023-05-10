@@ -8,7 +8,7 @@ Model:
 Train:
     Dataset:
         type: "RGB_Dataset"
-        root: "/home/rafael_pixelcut_app/workspace/Datasets/DSCollections_1024x1024/"
+        root: "/home/rafael/datasets/DSCollections_1024x1024/"
         # sets: ['shorttest']
         sets: [
         'aim500', 'clothing', 'dis5k', 'ecommerce', 'foodseg103', 'hrsod', 'p3m10k', 'segfood', 'ukcarsdataset1005', 'voc2012',
@@ -35,19 +35,19 @@ Train:
     Dataloader:
         batch_size: 4
         shuffle: True
-        num_workers: 8
+        num_workers: 12
         pin_memory: False
     Optimizer:
         type: "Adam"
         lr: 1.0e-05
         weight_decay: 0.0
-        mixed_precision: True
+        mixed_precision: False
     Scheduler:
         type: "PolyLr"
         epoch: 6000000
         gamma: 0.9
         minimum_lr: 1.0e-07
-        warmup_iteration: 12000
+        warmup_iteration: 1000
     Checkpoint:
         checkpoint_epoch: 1
         checkpoint_dir: "snapshots/Plus_Ultra2"

@@ -64,7 +64,7 @@ def train(opt, args):
                 print('Resume from state')
         
     model = eval(opt.Model.name)(**opt.Model)
-    model.load_state_dict(torch.load('/home/rafael_pixelcut_app/inspyrenet_massiveSOD.pth'))
+    # model.load_state_dict(torch.load('/home/rafael/workspace/InSPyReNet/inspyrenet_massiveSOD.pth'))
     if model_ckpt is not None:
         model.load_state_dict(model_ckpt)
 
