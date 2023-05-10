@@ -31,7 +31,7 @@ def get_transform(tfs):
 class RGB_Dataset(Dataset):
     def __init__(self, root, sets, tfs):
         self.images, self.gts = [], []
-        
+
         for set in sets:
             # image_root, gt_root = os.path.join(root, set, 'images'), os.path.join(root, set, 'masks')
             # image_root, gt_root = os.path.join(root, set, 'im'), os.path.join(root, set, 'gt')
@@ -39,25 +39,25 @@ class RGB_Dataset(Dataset):
 
             images = [os.path.join(image_root, f) for f in os.listdir(image_root) if f.lower().endswith(('.jpg', '.png'))]
             images = sort(images)
-            
+
             gts = [os.path.join(gt_root, f) for f in os.listdir(gt_root) if f.lower().endswith(('.jpg', '.png'))]
             gts = sort(gts)
-            
+
             self.images.extend(images)
             self.gts.extend(gts)
-        
+
         self.filter_files()
-        
+
         self.size = len(self.images)
         self.transform = get_transform(tfs)
-        
+
     def __getitem__(self, index):
         image = Image.open(self.images[index]).convert('RGB')
         gt = Image.open(self.gts[index]).convert('L')
         shape = gt.size[::-1]
         name = self.images[index].split(os.sep)[-1]
         name = os.path.splitext(name)[0]
-            
+
         sample = {'image': image, 'gt': gt, 'name': name, 'shape': shape}
 
         sample = self.transform(sample)
@@ -75,7 +75,7 @@ class RGB_Dataset(Dataset):
 
     def __len__(self):
         return self.size
-    
+
 class ImageLoader:
     def __init__(self, root, tfs):
         if os.path.isdir(root):
@@ -97,19 +97,19 @@ class ImageLoader:
         shape = image.size[::-1]
         name = self.images[self.index].split(os.sep)[-1]
         name = os.path.splitext(name)[0]
-            
+
         sample = {'image': image, 'name': name, 'shape': shape, 'original': image}
         sample = self.transform(sample)
         sample['image'] = sample['image'].unsqueeze(0)
         if 'image_resized' in sample.keys():
             sample['image_resized'] = sample['image_resized'].unsqueeze(0)
-        
+
         self.index += 1
         return sample
 
     def __len__(self):
         return self.size
-    
+
 class VideoLoader:
     def __init__(self, root, tfs):
         if os.path.isdir(root):
@@ -128,7 +128,7 @@ class VideoLoader:
     def __next__(self):
         if self.index == self.size:
             raise StopIteration
-        
+
         if self.cap is None:
             self.cap = cv2.VideoCapture(self.videos[self.index])
             self.fps = self.cap.get(cv2.CAP_PROP_FPS)
@@ -140,7 +140,7 @@ class VideoLoader:
             self.cap = None
             sample = {'image': None, 'shape': None, 'name': name, 'original': None}
             self.index += 1
-        
+
         else:
             frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
             image = Image.fromarray(frame).convert('RGB')
@@ -150,12 +150,12 @@ class VideoLoader:
             sample['image'] = sample['image'].unsqueeze(0)
             if 'image_resized' in sample.keys():
                 sample['image_resized'] = sample['image_resized'].unsqueeze(0)
-            
+
         return sample
-    
+
     def __len__(self):
         return self.size
-    
+
 
 class WebcamLoader:
     def __init__(self, ID, tfs):
@@ -168,7 +168,7 @@ class WebcamLoader:
         self.imgs.append(self.cap.read()[1])
         self.thread = Thread(target=self.update, daemon=True)
         self.thread.start()
-        
+
     def update(self):
         while self.cap.isOpened():
             ret, frame = self.cap.read()
@@ -176,7 +176,7 @@ class WebcamLoader:
                 self.imgs.append(frame)
             else:
                 break
-        
+
     def __iter__(self):
         return self
 
@@ -188,7 +188,7 @@ class WebcamLoader:
         if self.thread.is_alive() is False or cv2.waitKey(1) == ord('q'):
             cv2.destroyAllWindows()
             raise StopIteration
-        
+
         else:
             image = Image.fromarray(frame).convert('RGB')
             shape = image.size[::-1]
@@ -197,22 +197,22 @@ class WebcamLoader:
             sample['image'] = sample['image'].unsqueeze(0)
             if 'image_resized' in sample.keys():
                 sample['image_resized'] = sample['image_resized'].unsqueeze(0)
-        
+
         del self.imgs[:-1]
         return sample
 
 
     def __len__(self):
         return 0
-    
+
 class RefinementLoader:
     def __init__(self, image_dir, seg_dir, tfs):
         self.images = [os.path.join(image_dir, f) for f in os.listdir(image_dir) if f.lower().endswith(('.jpg', '.png', '.jpeg'))]
         self.images = sort(self.images)
-        
+
         self.segs = [os.path.join(seg_dir, f) for f in os.listdir(seg_dir) if f.lower().endswith(('.jpg', '.png', '.jpeg'))]
         self.segs = sort(self.segs)
-            
+
         self.size = len(self.images)
         self.transform = get_transform(tfs)
 
@@ -228,7 +228,7 @@ class RefinementLoader:
         shape = image.size[::-1]
         name = self.images[self.index].split(os.sep)[-1]
         name = os.path.splitext(name)[0]
-            
+
         sample = {'image': image, 'gt': seg, 'name': name, 'shape': shape, 'original': image}
         sample = self.transform(sample)
         sample['image'] = sample['image'].unsqueeze(0)
@@ -236,10 +236,10 @@ class RefinementLoader:
         if 'image_resized' in sample.keys():
             sample['image_resized'] = sample['image_resized'].unsqueeze(0)
         del sample['gt']
-        
+
         self.index += 1
         return sample
 
     def __len__(self):
         return self.size
-    
+

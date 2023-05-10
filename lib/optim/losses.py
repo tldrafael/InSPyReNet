@@ -8,12 +8,12 @@ def bce_loss(pred, mask, reduction='none'):
 def weighted_bce_loss(pred, mask, reduction='none'):
     weight = 1 + 5 * torch.abs(F.avg_pool2d(mask, kernel_size=31, stride=1, padding=15) - mask)
     weight = weight.flatten()
-    
+
     bce = weight * bce_loss(pred, mask, reduction='none').flatten()
-    
+
     if reduction == 'mean':
         bce = bce.mean()
-    
+
     return bce
 
 def iou_loss(pred, mask, reduction='none'):

@@ -9,7 +9,7 @@ sys.path.append(repopath)
 def download_and_unzip(filename, url, dest, unzip=True, **kwargs):
     if not os.path.isdir(dest):
         os.makedirs(dest, exist_ok=True)
-    
+
     os.system("wget -O {} {}".format(os.path.join(dest, filename), url))
     if unzip:
         os.system("unzip -o {} -d {}".format(os.path.join(dest, filename), dest))
@@ -52,8 +52,8 @@ backbone_ckpts = [
 ]
 
 pretrained_ckpts = [
-{'filename': "latest.pth", 'url': "https://postechackr-my.sharepoint.com/:u:/g/personal/taehoon1018_postech_ac_kr/ERqm7RPeNBFPvVxkA5P5G2AB-mtFsiYkCNHnBf0DcwpFzw\?e\=nayVno\&download\=1", 'dest': "snapshots/InSPyReNet_Res2Net50"      , 'unzip': False, 'extra':False},   
-{'filename': "latest.pth", 'url': "https://postechackr-my.sharepoint.com/:u:/g/personal/taehoon1018_postech_ac_kr/EV0ow4E8LddCgu5tAuAkMbcBpBYoEDmJgQg5wkiuvLoQUA\?e\=cOZspv\&download\=1", 'dest': "snapshots/InSPyReNet_SwinB"          , 'unzip': False, 'extra':False}, 
+{'filename': "latest.pth", 'url': "https://postechackr-my.sharepoint.com/:u:/g/personal/taehoon1018_postech_ac_kr/ERqm7RPeNBFPvVxkA5P5G2AB-mtFsiYkCNHnBf0DcwpFzw\?e\=nayVno\&download\=1", 'dest': "snapshots/InSPyReNet_Res2Net50"      , 'unzip': False, 'extra':False},
+{'filename': "latest.pth", 'url': "https://postechackr-my.sharepoint.com/:u:/g/personal/taehoon1018_postech_ac_kr/EV0ow4E8LddCgu5tAuAkMbcBpBYoEDmJgQg5wkiuvLoQUA\?e\=cOZspv\&download\=1", 'dest': "snapshots/InSPyReNet_SwinB"          , 'unzip': False, 'extra':False},
 {'filename': "latest.pth", 'url': "https://postechackr-my.sharepoint.com/:u:/g/personal/taehoon1018_postech_ac_kr/EWxPZoIKALlGsfrNgUFNvxwBC8IE8jzzhPNtzcbHmTNFcg\?e\=e22wmy\&download\=1", 'dest': "snapshots/InSPyReNet_SwinB_DH_LR"    , 'unzip': False, 'extra':True},
 {'filename': "latest.pth", 'url': "https://postechackr-my.sharepoint.com/:u:/g/personal/taehoon1018_postech_ac_kr/EQe-iy0AZctIkgl3o-BmVYUBn795wvii3tsnBq1fNUbc9g\?e\=gMZ4PV\&download\=1", 'dest': "snapshots/InSPyReNet_SwinB_HU_LR"    , 'unzip': False, 'extra':True},
 {'filename': "latest.pth", 'url': "https://postechackr-my.sharepoint.com/:u:/g/personal/taehoon1018_postech_ac_kr/EfsCbnfAU1RAqCJIkj1ewRgBhFetStsGB6SMSq_UJZimjA\?e\=Ghuacy\&download\=1", 'dest': "snapshots/InSPyReNet_SwinB_DHU_LR"   , 'unzip': False, 'extra':True},
@@ -133,7 +133,7 @@ precomputed_maps = [
 
 if __name__ == '__main__':
     args = _args()
-    
+
     if args.dest is not None:
         os.system('ln -s ' + os.path.join(args.dest, 'data', 'Train_Dataset')  + ' ' + os.path.join(repopath, 'data'))
         os.system('ln -s ' + os.path.join(args.dest, 'data', 'Test_Dataset')   + ' ' + os.path.join(repopath, 'data'))
@@ -145,9 +145,9 @@ if __name__ == '__main__':
         os.makedirs(os.path.join(args.dest, 'data', 'Test_Dataset'),  exist_ok=True)
         os.makedirs(os.path.join(args.dest, 'data', 'backbone_ckpt'), exist_ok=True)
         os.makedirs(os.path.join(args.dest, 'snapshots'), exist_ok=True)
-    
+
     download_list = train_datasets + test_datasets + backbone_ckpts + pretrained_ckpts + precomputed_maps
-    
+
     for dinfo in download_list:
         dinfo['dest'] = os.path.join(args.dest, dinfo['dest'])
         if not dinfo['extra'] or args.extra:

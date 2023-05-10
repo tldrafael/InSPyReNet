@@ -24,7 +24,7 @@ def test(opt, args):
     model.load_state_dict(torch.load('/home/rafael_pixelcut_app/inspyrenet_DUTSTR_HRSODTR_LR.pth'))
     # model.load_state_dict(torch.load('/home/rafael_pixelcut_app/inspyrenet_massiveSOD.pth'))
     # model.load_state_dict(torch.load(os.path.join(opt.Test.Checkpoint.checkpoint_dir, 'latest.pth')), strict=True)
-        
+
     model.cuda()
     model.eval()
 
@@ -51,7 +51,7 @@ def test(opt, args):
             sample = to_cuda(sample)
             with torch.no_grad():
                 out = model(sample)
-            
+
             pred = to_numpy(out['pred'], sample['shape'])
             Image.fromarray((pred * 255).astype(np.uint8)).save(os.path.join(save_path, sample['name'][0] + '.png'))
 

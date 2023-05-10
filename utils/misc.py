@@ -16,11 +16,11 @@ class Simplify(nn.Module):
     def __init__(self, model):
         super(Simplify, self).__init__()
         self.model = model
-        
+
     def cuda(self):
         self.model = self.model.cuda()
         return self
-        
+
     def forward(self, x):
         out = self.model({'image': x})
         return out['pred']
@@ -32,7 +32,7 @@ def parse_args():
     parser.add_argument('--verbose', '-v', action='store_true', default=False)
     parser.add_argument('--debug',   '-d', action='store_true', default=False)
     args = parser.parse_args()
-    
+
     cuda_visible_devices = None
     local_rank = -1
 
@@ -50,7 +50,7 @@ def parse_args():
 
     args.device_num = device_num
     args.local_rank = local_rank
-    
+
     warnings.simplefilter("ignore")
 
     return args

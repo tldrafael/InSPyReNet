@@ -54,29 +54,29 @@ class IoU(object):
 
     def cal_iou(self, pred, gt):
         pred = (pred * 255).astype(np.uint8)
-            
+
         bins = np.linspace(0, 256, 257)
         fg_hist, _ = np.histogram(pred[gt], bins=bins) # ture positive
         bg_hist, _ = np.histogram(pred[~gt], bins=bins) # false positive
-        fg_w_thrs = np.cumsum(np.flip(fg_hist), axis=0) 
+        fg_w_thrs = np.cumsum(np.flip(fg_hist), axis=0)
         bg_w_thrs = np.cumsum(np.flip(bg_hist), axis=0)
         TPs = fg_w_thrs
         Ps = fg_w_thrs + bg_w_thrs # positives
-        Ps[Ps == 0] = 1 
+        Ps[Ps == 0] = 1
         T = max(np.count_nonzero(gt), 1)
-        
+
         ious = TPs / (T + bg_w_thrs)
         return ious
 
     def get_results(self) -> dict:
         iou = np.mean(np.array(self.ious, dtype=_TYPE), axis=0)
         return dict(iou=dict(curve=iou))
-    
+
 class BIoU(object):
     def __init__(self, dilation_ratio=0.02):
         self.bious = []
         self.dilation_ratio = dilation_ratio
-            
+
     def mask_to_boundary(self, mask):
         h, w = mask.shape
         img_diag = np.sqrt(h ** 2 + w ** 2)
@@ -103,29 +103,29 @@ class BIoU(object):
         gt = (gt * 255).astype(np.uint8)
         gt = self.mask_to_boundary(gt)
         gt = gt > 128
-            
+
         bins = np.linspace(0, 256, 257)
         fg_hist, _ = np.histogram(pred[gt], bins=bins) # ture positive
         bg_hist, _ = np.histogram(pred[~gt], bins=bins) # false positive
-        fg_w_thrs = np.cumsum(np.flip(fg_hist), axis=0) 
+        fg_w_thrs = np.cumsum(np.flip(fg_hist), axis=0)
         bg_w_thrs = np.cumsum(np.flip(bg_hist), axis=0)
         TPs = fg_w_thrs
         Ps = fg_w_thrs + bg_w_thrs # positives
-        Ps[Ps == 0] = 1 
+        Ps[Ps == 0] = 1
         T = max(np.count_nonzero(gt), 1)
-        
+
         ious = TPs / (T + bg_w_thrs)
         return ious
 
     def get_results(self) -> dict:
         biou = np.mean(np.array(self.bious, dtype=_TYPE), axis=0)
         return dict(biou=dict(curve=biou))
-    
+
 class TIoU(object):
     def __init__(self, dilation_ratio=0.001):
         self.tious = []
         self.dilation_ratio = dilation_ratio
-            
+
     def mask_to_boundary(self, mask):
         h, w = mask.shape
         img_diag = np.sqrt(h ** 2 + w ** 2)
@@ -148,23 +148,23 @@ class TIoU(object):
 
     def cal_tiou(self, pred, gt):
         pred = (pred * 255).astype(np.uint8)
-        
+
         gt = (gt * 255).astype(np.uint8)
         gt = self.mask_to_boundary(gt)
         gt = gt > 128
-        
+
         pred = pred * gt
-        
+
         bins = np.linspace(0, 256, 257)
         fg_hist, _ = np.histogram(pred[gt], bins=bins) # ture positive
         bg_hist, _ = np.histogram(pred[~gt], bins=bins) # false positive
-        fg_w_thrs = np.cumsum(np.flip(fg_hist), axis=0) 
+        fg_w_thrs = np.cumsum(np.flip(fg_hist), axis=0)
         bg_w_thrs = np.cumsum(np.flip(bg_hist), axis=0)
         TPs = fg_w_thrs
         Ps = fg_w_thrs + bg_w_thrs # positives
-        Ps[Ps == 0] = 1 
+        Ps[Ps == 0] = 1
         T = max(np.count_nonzero(gt), 1)
-        
+
         ious = TPs / (T + bg_w_thrs)
         return ious
 
@@ -239,7 +239,7 @@ class Fmeasure(object):
         """
         pred = (pred * 255).astype(np.uint8)
         bins = np.linspace(0, 256, 257)
-        fg_hist, _ = np.histogram(pred[gt], bins=bins) 
+        fg_hist, _ = np.histogram(pred[gt], bins=bins)
         bg_hist, _ = np.histogram(pred[~gt], bins=bins)
         fg_w_thrs = np.cumsum(np.flip(fg_hist), axis=0)
         bg_w_thrs = np.cumsum(np.flip(bg_hist), axis=0)
@@ -784,7 +784,7 @@ class BoundaryAccuracy(object):
 
     def step(self, pred: np.ndarray, gt: np.ndarray):
         # pred, gt = _prepare_data(pred, gt)
-        
+
         refined = gt.copy()
 
         rmin = cmin = 0
@@ -802,13 +802,13 @@ class BoundaryAccuracy(object):
             if not((cmax==cmin) or (rmax==rmin)):
                 class_refined_prob = np.array(Image.fromarray(pred).resize((cmax-cmin, rmax-rmin), Image.BILINEAR))
                 refined[rmin:rmax, cmin:cmax] = class_refined_prob
-        
+
         pred = pred > 128
         gt = gt > 128
 
         ba = self.cal_ba(pred, gt)
         self.bas.append(ba)
-        
+
     def get_disk_kernel(self, radius):
         return cv2.getStructuringElement(cv2.MORPH_ELLIPSE, (radius*2+1, radius*2+1))
 
@@ -818,7 +818,7 @@ class BoundaryAccuracy(object):
 
         :return: ba
         """
-    
+
         gt = gt.astype(np.uint8)
         pred = pred.astype(np.uint8)
 

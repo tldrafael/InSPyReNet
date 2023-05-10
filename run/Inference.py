@@ -35,7 +35,7 @@ def _args():
 def get_format(source):
     img_count = len([i for i in source if i.lower().endswith(('.jpg', '.png', '.jpeg'))])
     vid_count = len([i for i in source if i.lower().endswith(('.mp4', '.avi', '.mov' ))])
-    
+
     if img_count * vid_count != 0:
         return ''
     elif img_count != 0:
@@ -51,24 +51,24 @@ def inference(opt, args):
        opt.Test.Checkpoint.checkpoint_dir, 'latest.pth'), map_location=torch.device('cuda')), strict=True)
     # model.load_state_dict(torch.load('/home/rafael_pixelcut_app/inspyrenet_DUTSTR_HRSODTR.pth'))
     # model.load_state_dict(torch.load('/home/rafael_pixelcut_app/inspyrenet_massiveSOD.pth'))
-    
+
     if args.gpu is True:
         model = model.cuda()
     model.eval()
-        
+
     if args.jit is True:
         if os.path.isfile(os.path.join(opt.Test.Checkpoint.checkpoint_dir, 'jit.pt')) is False:
             model = Simplify(model)
             model = torch.jit.trace(model, torch.rand(1, 3, *opt.Test.Dataset.transforms.static_resize.size).cuda(), strict=False)
             torch.jit.save(model, os.path.join(opt.Test.Checkpoint.checkpoint_dir, 'jit.pt'))
-        
+
         else:
             del model
             model = torch.jit.load(os.path.join(opt.Test.Checkpoint.checkpoint_dir, 'jit.pt'))
-                
+
     save_dir = None
     _format = None
-    
+
     if args.source.isnumeric() is True:
         _format = 'Webcam'
 
@@ -79,13 +79,13 @@ def inference(opt, args):
     elif os.path.isfile(args.source):
         save_dir = 'results'
         _format = get_format([args.source])
-        
+
     if args.dest is not None:
         save_dir = args.dest
-        
+
     if save_dir is not None:
         os.makedirs(save_dir, exist_ok=True)
-    
+
     _format = 'Image'
     sample_list = eval(_format + 'Loader')(args.source, opt.Test.Dataset.transforms)
 
@@ -94,7 +94,7 @@ def inference(opt, args):
             sample_list), position=0, leave=False, bar_format='{desc:<30}{percentage:3.0f}%|{bar:50}{r_bar}')
     else:
         samples = sample_list
-        
+
     writer = None
     background = None
 
@@ -107,7 +107,7 @@ def inference(opt, args):
                 writer.release()
             writer = None
             continue
-        
+
         if args.gpu is True:
             sample = to_cuda(sample)
 
@@ -116,8 +116,8 @@ def inference(opt, args):
                 out = model(sample['image'])
             else:
                 out = model(sample)
-                
-                    
+
+
         pred = to_numpy(out['pred'], sample['shape'])
         if np.isnan(pred).any():
             continue
@@ -156,12 +156,12 @@ def inference(opt, args):
                 log = ((log - log.min()) / (log.max() - log.min()) * 255).astype(np.uint8)
                 log = cv2.cvtColor(log, cv2.COLOR_GRAY2RGB)
                 log = cv2.resize(log, img.shape[:2][::-1])
-                Image.fromarray(log).save(os.path.join(save_dir, sample['name'] + '_' + str(i) + '.png'))    
+                Image.fromarray(log).save(os.path.join(save_dir, sample['name'] + '_' + str(i) + '.png'))
                 # size=img.shape[:2][::-1]
-            
-            
+
+
         img = img.astype(np.uint8)
-        
+
         if _format == 'Image':
             Image.fromarray(img).save(os.path.join(save_dir, sample['name'] + '.png'))
         elif _format == 'Video' and writer is not None:

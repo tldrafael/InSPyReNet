@@ -26,13 +26,13 @@ def _args():
 def benchmark(opt, args):
     model = Simplify(eval(opt.Model.name)(**opt.Model))
     model = model.cuda()
-    
-    input = torch.rand(1, 3, *args.input_size)   
+
+    input = torch.rand(1, 3, *args.input_size)
     input = input.cuda()
-    
+
     macs, params = profile(model, inputs=(input, ), verbose=False)
     macs, params = clever_format([macs, params], "%.3f")
-    
+
     with torch.no_grad():
         start = torch.cuda.Event(enable_timing=True)
         end = torch.cuda.Event(enable_timing=True)
@@ -41,7 +41,7 @@ def benchmark(opt, args):
         for i in range(10):
             out = model(input)
             end.record()
-        
+
     # Waits for everything to finish running
     torch.cuda.synchronize()
 

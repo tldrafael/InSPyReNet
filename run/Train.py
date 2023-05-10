@@ -29,7 +29,7 @@ torch.backends.cudnn.allow_tf32 = False
 
 def train(opt, args):
     train_dataset = eval(opt.Train.Dataset.type)(
-        root=opt.Train.Dataset.root, 
+        root=opt.Train.Dataset.root,
         sets=opt.Train.Dataset.sets,
         tfs=opt.Train.Dataset.transforms)
 
@@ -50,7 +50,7 @@ def train(opt, args):
 
     model_ckpt = None
     state_ckpt = None
-    
+
     print(f'resume: {args.resume}')
     if args.resume is True:
         print('Resume from checkpoint')
@@ -62,7 +62,7 @@ def train(opt, args):
             state_ckpt = torch.load(os.path.join(opt.Train.Checkpoint.checkpoint_dir,  'state.pth'), map_location='cpu')
             if args.local_rank <= 0:
                 print('Resume from state')
-        
+
     model = eval(opt.Model.name)(**opt.Model)
     # model.load_state_dict(torch.load('/home/rafael/workspace/InSPyReNet/inspyrenet_massiveSOD.pth'))
     if model_ckpt is not None:
@@ -86,13 +86,13 @@ def train(opt, args):
 
     params_list = [{'params': backbone_params}, {
         'params': decoder_params, 'lr': opt.Train.Optimizer.lr * 10}]
-    
+
     optimizer = eval(opt.Train.Optimizer.type)(
         params_list, opt.Train.Optimizer.lr, weight_decay=opt.Train.Optimizer.weight_decay)
-    
+
     if state_ckpt is not None:
         optimizer.load_state_dict(state_ckpt['optimizer'])
-    
+
     if opt.Train.Optimizer.mixed_precision is True:
         scaler = GradScaler()
     else:
@@ -110,7 +110,7 @@ def train(opt, args):
     start = 1
     if state_ckpt is not None:
         start = state_ckpt['epoch']
-        
+
     epoch_iter = range(start, opt.Train.Scheduler.epoch + 1)
     if args.local_rank <= 0 and args.verbose is True:
         epoch_iter = tqdm.tqdm(epoch_iter, desc='Epoch', total=opt.Train.Scheduler.epoch, initial=start - 1,
@@ -156,21 +156,21 @@ def train(opt, args):
                 opt.Train.Checkpoint.checkpoint_dir, 'debug'), exist_ok=True)
             if epoch % opt.Train.Checkpoint.checkpoint_epoch == 0:
                 if args.device_num > 1:
-                    model_ckpt = model.module.state_dict()  
+                    model_ckpt = model.module.state_dict()
                 else:
                     model_ckpt = model.state_dict()
-                    
+
                 state_ckpt = {'epoch': epoch + 1,
                             'optimizer': optimizer.state_dict(),
                             'scheduler': scheduler.state_dict()}
-                
+
                 torch.save(model_ckpt, os.path.join(opt.Train.Checkpoint.checkpoint_dir, 'latest.pth'))
                 torch.save(state_ckpt, os.path.join(opt.Train.Checkpoint.checkpoint_dir,  'state.pth'))
-                
+
             if args.debug is True:
                 debout = debug_tile(sum([out[k] for k in opt.Train.Debug.keys], []), activation=torch.sigmoid)
                 cv2.imwrite(os.path.join(opt.Train.Checkpoint.checkpoint_dir, 'debug', str(epoch) + '.png'), debout)
-    
+
     if args.local_rank <= 0:
         torch.save(model.module.state_dict() if args.device_num > 1 else model.state_dict(),
                     os.path.join(opt.Train.Checkpoint.checkpoint_dir, 'latest.pth'))
