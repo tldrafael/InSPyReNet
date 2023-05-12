@@ -197,3 +197,51 @@ def InSPyReNet_Res2Net50(depth, pretrained, base_size, **kwargs):
 
 def InSPyReNet_SwinB(depth, pretrained, base_size, **kwargs):
     return InSPyReNet(SwinB(pretrained=pretrained), [128, 128, 256, 512, 1024], depth, base_size, **kwargs)
+
+
+class InSPyReNet_BGR(InSPyReNet):
+
+    def __init__(self, **kwargs):
+        kwargs['backbone'] = SwinB()
+        kwargs['pretrained'] = False
+        kwargs['depth'] = 64
+        kwargs['base_size'] = (1024, 1024)
+        kwargs['in_channels'] = [128, 128, 256, 512, 1024]
+        kwargs['threshold'] = None
+        super(InSPyReNet_BGR, self).__init__(**kwargs)
+
+    def forward_inference(self, x):
+        B, _, H, W = x.shape
+
+        x1, x2, x3, x4, x5 = self.backbone(x)
+
+        x1 = self.context1(x1) #4
+        x2 = self.context2(x2) #4
+        x3 = self.context3(x3) #8
+        x4 = self.context4(x4) #16
+        x5 = self.context5(x5) #32
+
+        f3, d3 = self.decoder([x3, x4, x5]) #16
+
+        f3 = self.res(f3, (H // 4,  W // 4 ))
+        f2, p2 = self.attention2(torch.cat([x2, f3], dim=1), d3.detach())
+        d2 = self.image_pyramid.reconstruct(d3.detach(), p2) #4
+
+        x1 = self.res(x1, (H // 2, W // 2))
+        f2 = self.res(f2, (H // 2, W // 2))
+        f1, p1 = self.attention1(torch.cat([x1, f2], dim=1), d2.detach(), p2.detach()) #2
+        d1 = self.image_pyramid.reconstruct(d2.detach(), p1) #2
+
+        f1 = self.res(f1, (H, W))
+        _, p0 = self.attention0(f1, d1.detach(), p1.detach()) #2
+        d0 = self.image_pyramid.reconstruct(d1.detach(), p0) #2
+
+        return [d3, d2, d1, d0], [p2, p1, p0]
+
+    def train(self):
+        return nn.Module.train(self, True)
+        # super(InSPyReNet, self).train()
+
+    def eval(self):
+        return nn.Module.train(self, False)
+

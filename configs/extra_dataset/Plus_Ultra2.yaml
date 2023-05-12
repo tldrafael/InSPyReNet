@@ -36,7 +36,7 @@ Train:
         batch_size: 4
         shuffle: True
         num_workers: 12
-        pin_memory: False
+        pin_memory: True
     Optimizer:
         type: "Adam"
         lr: 1.0e-05
