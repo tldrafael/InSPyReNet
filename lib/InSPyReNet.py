@@ -201,11 +201,11 @@ def InSPyReNet_SwinB(depth, pretrained, base_size, **kwargs):
 
 class InSPyReNet_BGR(InSPyReNet):
 
-    def __init__(self, **kwargs):
+    def __init__(self, base_size=(1024, 1024), **kwargs):
         kwargs['backbone'] = SwinB()
         kwargs['pretrained'] = False
         kwargs['depth'] = 64
-        kwargs['base_size'] = (1024, 1024)
+        kwargs['base_size'] = base_size
         kwargs['in_channels'] = [128, 128, 256, 512, 1024]
         kwargs['threshold'] = None
         super(InSPyReNet_BGR, self).__init__(**kwargs)
